@@ -39,22 +39,42 @@ pygame.display.set_caption('Змейка')
 clock = pygame.time.Clock()
 
 
-# Тут опишите все классы игры.
-...
+SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+
+class GameObject:
+
+    def __init__(self, position=SCREEN_CENTER, body_color=None):
+        self.position = position
+        self.body_color = body_color
+
+    def draw(self):
+        pass
+
+
+class Apple(GameObject):
+    
+    def __init__(self):
+        super().__init__(body_color=APPLE_COLOR)
+
+
+    def draw(self):
+        rect = pygame.Rect(
+            self.position,
+            (GRID_SIZE, GRID_SIZE),
+        )
+        pygame.draw.rect(screen, self.body_color, rect)
+        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
 
 def main():
-    # Инициализация PyGame:
     pygame.init()
-    # Тут нужно создать экземпляры классов.
-    ...
+    apple = Apple()
+    
 
-    # while True:
-    #     clock.tick(SPEED)
-
-        # Тут опишите основную логику игры.
-        # ...
-
+    while True:
+        clock.tick(SPEED)
+        apple.draw()
+        pygame.display.update()
 
 if __name__ == '__main__':
     main()
