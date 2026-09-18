@@ -42,7 +42,6 @@ clock = pygame.time.Clock()
 SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
 class GameObject:
-
     def __init__(self, position=SCREEN_CENTER, body_color=None):
         self.position = position
         self.body_color = body_color
@@ -52,7 +51,6 @@ class GameObject:
 
 
 class Apple(GameObject):
-    
     def __init__(self):
         super().__init__(body_color=APPLE_COLOR)
 
@@ -65,14 +63,55 @@ class Apple(GameObject):
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
 
 
+class Snake(GameObject):
+    def __init__(self):
+        super().__init__(
+            position=SCREEN_CENTER,
+            body_color=SNAKE_COLOR,
+        )
+        self.length = 1
+        self.positions = [self.position]
+        self.last = None
+        self.direction = RIGHT
+
+    def draw(self):
+        for position in self.positions[:-1]:
+            rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
+            pygame.draw.rect(screen, self.body_color, rect)
+            pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+
+        head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
+        pygame.draw.rect(screen, self.body_color, head_rect)
+        pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
+
+        if self.last:
+            last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
+            pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
+
+    def move(self):
+        head_x, head_y = self.positions[0]
+        direction_x, direction_y = self.direction
+
+        new_head = (
+            (head_x + direction_x * GRID_SIZE) % SCREEN_WIDTH,
+            (head_y + direction_y * GRID_SIZE) % SCREEN_HEIGHT,
+        )
+        self.positions.insert(0, new_head)
+        self.last = self.positions.pop()
+
+
 def main():
     pygame.init()
     apple = Apple()
+    snake = Snake()
     
 
     while True:
         clock.tick(SPEED)
         apple.draw()
+        snake.draw()
+        snake.move()
+
         pygame.display.update()
 
         for event in pygame.event.get():
