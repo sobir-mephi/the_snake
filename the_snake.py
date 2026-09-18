@@ -41,6 +41,21 @@ clock = pygame.time.Clock()
 
 SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
+
+KEY_DIRECTIONS = {
+    pygame.K_UP: UP,
+    pygame.K_DOWN: DOWN,
+    pygame.K_LEFT: LEFT,
+    pygame.K_RIGHT: RIGHT,
+}
+
+OPPOSITE_DIRECTIONS = {
+    UP: DOWN,
+    DOWN: UP,
+    LEFT: RIGHT,
+    RIGHT: LEFT,
+}
+
 class GameObject:
     def __init__(self, position=SCREEN_CENTER, body_color=None):
         self.position = position
@@ -99,6 +114,11 @@ class Snake(GameObject):
         self.positions.insert(0, new_head)
         self.last = self.positions.pop()
 
+    def set_direction(self, direction):
+        if (direction is not None and
+            direction != OPPOSITE_DIRECTIONS[self.direction]):
+            self.direction = direction
+
 
 def main():
     pygame.init()
@@ -108,16 +128,22 @@ def main():
 
     while True:
         clock.tick(SPEED)
-        apple.draw()
-        snake.draw()
-        snake.move()
-
         pygame.display.update()
+
+        snake.move()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 raise SystemExit
+            elif event.type == pygame.KEYDOWN:
+                direction = KEY_DIRECTIONS.get(event.key)
+                if direction is not None:
+                    snake.set_direction(direction)
+
+        apple.draw()
+        snake.draw()
+
 
 if __name__ == '__main__':
     main()
