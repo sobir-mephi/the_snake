@@ -56,7 +56,6 @@ class Apple(GameObject):
     def __init__(self):
         super().__init__(body_color=APPLE_COLOR)
 
-
     def draw(self):
         rect = pygame.Rect(
             self.position,
@@ -75,6 +74,11 @@ def main():
         clock.tick(SPEED)
         apple.draw()
         pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                raise SystemExit
 
 if __name__ == '__main__':
     main()
