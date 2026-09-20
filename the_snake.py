@@ -118,12 +118,19 @@ class Snake(GameObject):
             (head_y + direction_y * GRID_SIZE) % SCREEN_HEIGHT,
         )
         self.positions.insert(0, new_head)
-        self.last = self.positions.pop()
+
+        if len(self.positions) > self.length:
+            self.last = self.positions.pop()
+        else:
+            self.last = None
 
     def set_direction(self, direction):
         if (direction is not None and
             direction != OPPOSITE_DIRECTIONS[self.direction]):
             self.direction = direction
+    
+    def grow(self):
+        self.length += 1
 
 
 def main():
@@ -140,6 +147,7 @@ def main():
 
         if snake.positions[0] == apple.position:
             apple.change_position()
+            snake.grow()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
