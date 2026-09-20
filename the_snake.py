@@ -76,6 +76,12 @@ class Apple(GameObject):
         )
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+    
+    def change_position(self):
+        self.position = (
+            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
+            randint(0, GRID_HEIGHT - 1) * GRID_SIZE,
+        )
 
 
 class Snake(GameObject):
@@ -131,6 +137,9 @@ def main():
         pygame.display.update()
 
         snake.move()
+
+        if snake.positions[0] == apple.position:
+            apple.change_position()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
