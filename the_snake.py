@@ -77,11 +77,28 @@ class Apple(GameObject):
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
     
-    def change_position(self):
-        self.position = (
-            randint(0, GRID_WIDTH - 1) * GRID_SIZE,
-            randint(0, GRID_HEIGHT - 1) * GRID_SIZE,
-        )
+    def change_position(self, occupied_positions):
+        """
+        Принимает координаты всего туловища змейки.
+        Меняет позицию яблока после поедания,
+        Яблоко появляется там, где нет змейки.
+        Если таких полей нет (змейка занимает все поле),
+        Функция выбрасывает исключение, которое должно быть обработано
+        в рантайме игры для ее рестарта.
+        """
+        occupied = set(occupied_positions)
+
+        if len(occupied) >= GRID_WIDTH * GRID_HEIGHT:
+            raise RuntimeError
+
+        free_positions = []
+        for column in range(GRID_WIDTH):
+            for row in range(GRID_HEIGHT):
+                position = (column * GRID_SIZE, row * GRID_SIZE)
+                if position not in occupied:
+                    free_positions.append(position)
+        
+        self.position = choice(free_positions)
 
 
 class Snake(GameObject):
@@ -153,8 +170,12 @@ def main():
         snake.move()
 
         if snake.positions[0] == apple.position:
-            apple.change_position()
             snake.grow()
+            try:
+                apple.change_position(snake.positions)
+            except RuntimeError:
+                snake.reset()
+                continue
             
         if snake.positions[0] in snake.positions[1:]:
             snake.reset()
