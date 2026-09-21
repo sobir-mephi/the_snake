@@ -66,8 +66,9 @@ class GameObject:
 
 
 class Apple(GameObject):
-    def __init__(self):
+    def __init__(self, occupied_positions):
         super().__init__(body_color=APPLE_COLOR)
+        self.change_position(occupied_positions)
 
     def draw(self):
         rect = pygame.Rect(
@@ -155,9 +156,8 @@ class Snake(GameObject):
 
 def main():
     pygame.init()
-    apple = Apple()
     snake = Snake()
-    
+    apple = Apple(snake.positions)
 
     while True:
         clock.tick(SPEED)
