@@ -1,4 +1,4 @@
-from random import choice, randint
+from random import choice
 
 import pygame
 
@@ -29,16 +29,6 @@ SNAKE_COLOR = (0, 255, 0)
 # Скорость движения змейки:
 SPEED = 20
 
-# Настройка игрового окна:
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
-
-# Заголовок окна игрового поля:
-pygame.display.set_caption('Змейка')
-
-# Настройка времени:
-clock = pygame.time.Clock()
-
-
 SCREEN_CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
 
@@ -56,6 +46,7 @@ OPPOSITE_DIRECTIONS = {
     RIGHT: LEFT,
 }
 
+
 class GameObject:
     def __init__(self, position=SCREEN_CENTER, body_color=None):
         self.position = position
@@ -70,7 +61,7 @@ class Apple(GameObject):
         super().__init__(body_color=APPLE_COLOR)
         self.change_position(occupied_positions)
 
-    def draw(self):
+    def draw(self, screen):
         rect = pygame.Rect(
             self.position,
             (GRID_SIZE, GRID_SIZE),
@@ -113,7 +104,7 @@ class Snake(GameObject):
         self.last = None
         self.direction = RIGHT
 
-    def draw(self):
+    def draw(self, screen):
         for position in self.positions:
             rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
             pygame.draw.rect(screen, self.body_color, rect)
@@ -139,8 +130,8 @@ class Snake(GameObject):
             self.last = None
 
     def set_direction(self, direction):
-        if (direction is not None and
-            direction != OPPOSITE_DIRECTIONS[self.direction]):
+        if (direction is not None
+                and direction != OPPOSITE_DIRECTIONS[self.direction]):
             self.direction = direction
     
     def grow(self):
@@ -151,45 +142,71 @@ class Snake(GameObject):
         self.length = 1
         self.positions = [self.position]
         self.direction = RIGHT
-        screen.fill(BOARD_BACKGROUND_COLOR)
 
 
-def main():
-    pygame.init()
-    snake = Snake()
-    apple = Apple(snake.positions)
+class SnakeGame:
+    def __init__(self):
+        pygame.init()
+        self.screen = pygame.display.set_mode(
+            (SCREEN_WIDTH, SCREEN_HEIGHT),
+            0,
+            32,
+        )
+        pygame.display.set_caption('Змейка')
 
-    while True:
-        clock.tick(SPEED)
-        pygame.display.update()
+        self.clock = pygame.time.Clock()
+        self.snake = Snake()
+        self.apple = Apple(self.snake.positions)
+        self.is_running = True
 
-        snake.move()
+    def run(self):
+        while self.is_running:
+            self.clock.tick(SPEED)
+            self.handle_events()
 
-        if snake.positions[0] == apple.position:
-            snake.grow()
-            try:
-                apple.change_position(snake.positions)
-            except RuntimeError:
-                snake.reset()
-                continue
-            
-        if snake.positions[0] in snake.positions[1:]:
-            snake.reset()
-
+            if self.is_running:
+                self.update()
+                self.draw()
+    
+    def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                raise SystemExit
+                self.is_running = False
             elif event.type == pygame.KEYDOWN:
                 direction = KEY_DIRECTIONS.get(event.key)
                 if direction is not None:
-                    snake.set_direction(direction)
+                    self.snake.set_direction(direction)
 
-        apple.draw()
-        snake.draw()
+    def update(self):
+        self.snake.move()
+
+        if self.snake.positions[0] == self.apple.position:
+            self.snake.grow()
+            self.place_apple()
+
+        if self.snake.positions[0] in self.snake.positions[1:]:
+            self.restart()
+
+    def place_apple(self):
+        try:
+            self.apple.change_position(self.snake.positions)
+        except RuntimeError:
+            self.restart()
+
+    def restart(self):
+        self.snake.reset()
+        self.apple.change_position(self.snake.positions)
+
+    def draw(self):
+        self.screen.fill(BOARD_BACKGROUND_COLOR)
+        self.snake.draw(self.screen)
+        self.apple.draw(self.screen)
+        pygame.display.update()
+
+
+def main():
+    SnakeGame().run()
 
 
 if __name__ == '__main__':
     main()
-
-
