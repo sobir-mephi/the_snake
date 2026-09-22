@@ -190,7 +190,7 @@ def main():
     apple = Apple()
 
     # Яблоко не должно появляться внутри змейки.
-    while apple.position in snake.positions:
+    while apple.position in set(snake.positions):
         apple.randomize_position()
 
     screen.fill(BOARD_BACKGROUND_COLOR)
