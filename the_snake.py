@@ -48,27 +48,33 @@ OPPOSITE_DIRECTIONS = {
 
 
 class GameObject:
+    """Базовый класс объектов игры."""
+
     def __init__(self, position=SCREEN_CENTER, body_color=None):
+        """Сохранить положение и цвет объекта."""
         self.position = position
         self.body_color = body_color
 
     def draw(self):
-        pass
+        """Нарисовать объект"""
 
 
 class Apple(GameObject):
+    """Яблоко."""
+
     def __init__(self, occupied_positions):
         super().__init__(body_color=APPLE_COLOR)
         self.change_position(occupied_positions)
 
     def draw(self, screen):
+        """Нарисовать объект"""
         rect = pygame.Rect(
             self.position,
             (GRID_SIZE, GRID_SIZE),
         )
         pygame.draw.rect(screen, self.body_color, rect)
         pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
-    
+
     def change_position(self, occupied_positions):
         """
         Принимает координаты всего туловища змейки.
@@ -89,12 +95,15 @@ class Apple(GameObject):
                 position = (column * GRID_SIZE, row * GRID_SIZE)
                 if position not in occupied:
                     free_positions.append(position)
-        
+
         self.position = choice(free_positions)
 
 
 class Snake(GameObject):
+    """Змейка."""
+
     def __init__(self):
+        """Создать змейку длиной в один сегмент в центре поля."""
         super().__init__(
             position=SCREEN_CENTER,
             body_color=SNAKE_COLOR,
@@ -105,6 +114,7 @@ class Snake(GameObject):
         self.direction = RIGHT
 
     def draw(self, screen):
+        """Нарисовать все сегменты змейки."""
         for position in self.positions:
             rect = (pygame.Rect(position, (GRID_SIZE, GRID_SIZE)))
             pygame.draw.rect(screen, self.body_color, rect)
@@ -115,6 +125,7 @@ class Snake(GameObject):
             pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
     def move(self):
+        """Переместить змейку."""
         head_x, head_y = self.positions[0]
         direction_x, direction_y = self.direction
 
@@ -130,14 +141,17 @@ class Snake(GameObject):
             self.last = None
 
     def set_direction(self, direction):
+        """Установить направление змейки."""
         if (direction is not None
                 and direction != OPPOSITE_DIRECTIONS[self.direction]):
             self.direction = direction
-    
+
     def grow(self):
+        """Увеличить длину змейки на один сегмент."""
         self.length += 1
 
     def reset(self):
+        """Вернуть змейку в начальное состояние."""
         self.position = SCREEN_CENTER
         self.length = 1
         self.positions = [self.position]
@@ -145,7 +159,10 @@ class Snake(GameObject):
 
 
 class SnakeGame:
+    """Приложение, управляющее состоянием и экраном игры."""
+
     def __init__(self):
+        """Инициализировать Pygame, окно и игровые объекты."""
         pygame.init()
         self.screen = pygame.display.set_mode(
             (SCREEN_WIDTH, SCREEN_HEIGHT),
@@ -160,6 +177,7 @@ class SnakeGame:
         self.is_running = True
 
     def run(self):
+        """Запустить игру и корректно завершить Pygame после выхода."""
         while self.is_running:
             self.clock.tick(SPEED)
             self.handle_events()
@@ -167,8 +185,9 @@ class SnakeGame:
             if self.is_running:
                 self.update()
                 self.draw()
-    
+
     def handle_events(self):
+        """Обработать закрытие окна и нажатия клавиш направления."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.is_running = False
@@ -178,6 +197,7 @@ class SnakeGame:
                     self.snake.set_direction(direction)
 
     def update(self):
+        """Рассчитать новое состояние змейки и яблока."""
         self.snake.move()
 
         if self.snake.positions[0] == self.apple.position:
@@ -188,16 +208,19 @@ class SnakeGame:
             self.restart()
 
     def place_apple(self):
+        """Разместить яблоко вне тела змейки."""
         try:
             self.apple.change_position(self.snake.positions)
         except RuntimeError:
             self.restart()
 
     def restart(self):
+        """Сбросить игру после столкновения или заполнения поля."""
         self.snake.reset()
         self.apple.change_position(self.snake.positions)
 
     def draw(self):
+        """Очистить кадр, нарисовать объекты и обновить экран."""
         self.screen.fill(BOARD_BACKGROUND_COLOR)
         self.snake.draw(self.screen)
         self.apple.draw(self.screen)
@@ -205,6 +228,7 @@ class SnakeGame:
 
 
 def main():
+    """Запуск игры."""
     SnakeGame().run()
 
 
